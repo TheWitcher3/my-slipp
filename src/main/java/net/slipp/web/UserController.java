@@ -1,30 +1,56 @@
 package net.slipp.web;
 
+import net.slipp.domain.User;
+import net.slipp.domain.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
+@RequestMapping("/users")
 public class UserController {
 
-    private List<User> users = new ArrayList<>();
+    @Autowired
+    private UserRepository userRepository;
 
-    @PostMapping("/create")
+    @PostMapping("")
     public String create(User user) {
         System.out.println(user);
-        users.add(user);
-        return "redirect:/list";
+        userRepository.save(user);
+        return "redirect:/users";
     }
 
-    @GetMapping("/list")
+    @GetMapping("")
     public String list(Model model) {
-        model.addAttribute("users", users);
+        model.addAttribute("users", userRepository.findAll());
         System.out.println(model.toString());
-        return "list";
+        return "/user/list";
+    }
+
+    @GetMapping("/form")
+    public String form() {
+        return "/user/form";
+    }
+
+    @GetMapping("/{id}/form")
+    public String updateForm(@PathVariable Long id, Model model) {
+        model.addAttribute("userInfo", userRepository.findById(id).orElse(null));
+        return "/user/updateForm";
+    }
+
+    @PostMapping("/{id}")
+//    @PutMapping("/{id}")
+    public String update(@PathVariable Long id, User updatedUser) {
+        User user = userRepository.findById(id).orElse(null);
+        user.setUserId(updatedUser.getUserId());
+        user.setName(updatedUser.getName());
+        user.setPassword(updatedUser.getPassword());
+        user.setEmail(updatedUser.getEmail());
+
+        userRepository.save(user);
+
+        return "redirect:/users";
     }
 
 }
