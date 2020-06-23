@@ -27,6 +27,13 @@ public class User {
                 '}';
     }
 
+    public void updateUser(User user) {
+        this.userId = user.userId;
+        this.password = user.password;
+        this.email = user.email;
+        this.name = user.name;
+    }
+
     public void setUserId(String userId) {
         this.userId = userId;
     }
