@@ -74,7 +74,15 @@ public class UserController {
         }
 
         System.out.println("로그인 성공");
-        session.setAttribute("user", user);
+        session.setAttribute("sessionedUser", user);
+        return "redirect:/";
+    }
+
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.removeAttribute("sessionedUser");
+        session.invalidate();
         return "redirect:/";
     }
 
