@@ -42,9 +42,24 @@ public class UserController {
 
     // 수정
     @GetMapping("/{id}/form")
-    public String updateForm(@PathVariable Long id, Model model) {
-        model.addAttribute("users", userRepository.findById(id).orElse(null));
+    public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
+        User tempUser = (User)session.getAttribute("sessionedUser");
+
+        if(tempUser == null) {
+            return "redirect:/users/loginForm";
+        }
+
+        if(!id.equals(tempUser.getId())) {
+            throw new IllegalStateException("니꺼만 고쳐");
+        }
+
+        User user = userRepository.findById(tempUser.getId()).orElse(null);
+        if(user == null) {
+            return "redirect:/users/loginForm";
+        }
+        model.addAttribute("users", user);
         return "/user/updateform";
+
     }
 
     @PostMapping("/update/{id}")
