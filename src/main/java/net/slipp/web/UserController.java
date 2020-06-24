@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,10 +27,24 @@ public class UserController {
         return "/user/list";
     }
 
+
+    // 가입
+    @GetMapping("/form")
+    public String form() {
+        return "/user/form";
+    }
+
     @PostMapping("")
     public String create(User user) {
         userRepository.save(user);
         return "redirect:/users";
+    }
+
+    // 수정
+    @GetMapping("/{id}/form")
+    public String updateForm(@PathVariable Long id, Model model) {
+        model.addAttribute("users", userRepository.findById(id).orElse(null));
+        return "/user/updateform";
     }
 
     @PostMapping("/update/{id}")
@@ -40,23 +55,30 @@ public class UserController {
         return "redirect:/users";
     }
 
-
-
-    @GetMapping("/form")
-    public String form() {
-        return "/user/form";
-    }
-
-    @GetMapping("/{id}/form")
-    public String updateForm(@PathVariable Long id, Model model) {
-        model.addAttribute("user", userRepository.findById(id).orElse(null));
-        return "/user/updateform";
-    }
-
-    @GetMapping("/login")
+    // 로그인
+    @GetMapping("/loginForm")
     public String login() {
         return "/user/login";
     }
+
+    @PostMapping("/login")
+    public String login(String userId, String password, HttpSession session) {
+        User user = userRepository.findByUserId(userId);
+        if(user == null) {
+            System.out.println("계정이 없음");
+            return "redirect:/users/loginForm";
+        }
+        else if(!user.getPassword().equals(password)) {
+            System.out.println("패스워드 불일치 // 정답 : " + user.getPassword() + " // 연동 값 : " + password);
+            return "redirect:/users/loginForm";
+        }
+
+        System.out.println("로그인 성공");
+        session.setAttribute("user", user);
+        return "redirect:/";
+    }
+
+
 
 }
 

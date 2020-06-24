@@ -17,7 +17,7 @@ class UserRepositoryTest {
         User user = new User();
         user.setName("이현하");
         user.setEmail("lee.hh@kt.com");
-        user.setPassword("1111");
+        user.setPassword("2222");
         user.setUserId("lee.hh");
 
         userRepository.save(user);
