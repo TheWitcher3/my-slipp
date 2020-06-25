@@ -43,22 +43,22 @@ public class UserController {
     // 수정
     @GetMapping("/{id}/form")
     public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
-        User tempUser = (User)session.getAttribute("sessionedUser");
-
-        if(tempUser == null) {
+        if(HttpSessionUtils.isLoginedUser(session)) {
             return "redirect:/users/loginForm";
         }
 
-        if(!id.equals(tempUser.getId())) {
-            throw new IllegalStateException("니꺼만 고쳐");
+        User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+
+        if(!sessionedUser.matchId(id.toString())) {
+            throw new IllegalStateException("아이디가 맞지 않음");
         }
 
-        User user = userRepository.findById(tempUser.getId()).orElse(null);
+        User user = userRepository.findById(sessionedUser.getId()).orElse(null);
         if(user == null) {
             return "redirect:/users/loginForm";
         }
         model.addAttribute("users", user);
-        return "/user/updateform";
+        return "/user/updateForm";
 
     }
 
@@ -83,20 +83,19 @@ public class UserController {
             System.out.println("계정이 없음");
             return "redirect:/users/loginForm";
         }
-        else if(!user.getPassword().equals(password)) {
-            System.out.println("패스워드 불일치 // 정답 : " + user.getPassword() + " // 연동 값 : " + password);
+        else if(!user.matchPassword(password)) {
             return "redirect:/users/loginForm";
         }
 
         System.out.println("로그인 성공");
-        session.setAttribute("sessionedUser", user);
+        session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
         return "redirect:/";
     }
 
     // 로그아웃
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.removeAttribute("sessionedUser");
+        session.removeAttribute(HttpSessionUtils.USER_SESSION_KEY);
         session.invalidate();
         return "redirect:/";
     }

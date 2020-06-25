@@ -58,4 +58,18 @@ public class User {
     public Long getId() {
         return id;
     }
+
+    public boolean matchPassword(String newPassword) {
+        if(newPassword == null) {
+            return false;
+        }
+        return newPassword.equals(password);
+    }
+
+    public boolean matchId(String newId) {
+        if(newId == null) {
+            return false;
+        }
+        return newId.equals(id);
+    }
 }
