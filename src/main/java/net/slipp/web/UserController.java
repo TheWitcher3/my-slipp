@@ -86,7 +86,6 @@ public class UserController {
         else if(!user.matchPassword(password)) {
             return "redirect:/users/loginForm";
         }
-
         System.out.println("로그인 성공");
         session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
         return "redirect:/";
