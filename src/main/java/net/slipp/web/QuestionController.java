@@ -6,10 +6,7 @@ import net.slipp.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -41,8 +38,65 @@ public class QuestionController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        Question question = questionRepository.findById(id).orElse(null);
-        model.addAttribute("question", question);
+        model.addAttribute("question", questionRepository.findById(id).orElse(null));
         return "/qna/show";
     }
+
+    @GetMapping("/{id}/form")
+    public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
+
+        if(!HttpSessionUtils.isLoginedUser(session)) {
+            return "/users/loginForm";
+        }
+        model.addAttribute("question", questionRepository.findById(id).orElse(null));
+        return "/qna/updateForm";
+    }
+
+    @PostMapping("/{id}/updateArticle")
+    public String updateArticle(@PathVariable Long id, String title, String contents, HttpSession session) {
+        Question question = questionRepository.findById(id).orElse(null);
+
+        User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+        if(!sessionedUser.getUserId().equals(question.getWriter().getUserId())) {
+            throw new IllegalStateException("로그인 유저만 삭제 가능");
+        }
+        question.update(title, contents);
+        System.out.println(question.toString());
+        questionRepository.save(question);
+
+        return String.format("redirect:/questions/%d", id);
+    }
+
+    @PostMapping("/{id}/deleteArticle")
+    public String deleteArticle(@PathVariable Long id) {
+        questionRepository.deleteById(id);
+
+        return "redirect:/";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
