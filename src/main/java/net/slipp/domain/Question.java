@@ -3,6 +3,7 @@ package net.slipp.domain;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "QUESTION_SEQ_GENERATOR", sequenceName = "QUESTION_SEQ", initialValue = 1, allocationSize = 1)
@@ -15,8 +16,9 @@ public class Question {
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
-//    private String writer;
+
     private String title;
+    @Lob
     private String contents;
 
     private LocalDateTime createDate;
@@ -29,13 +31,9 @@ public class Question {
         this.title = title;
     }
 
-    public String getContents() {
-        return contents;
-    }
-
-    public void setContents(String contents) {
-        this.contents = contents;
-    }
+    @OneToMany(mappedBy = "question")
+    @OrderBy("id ASC")
+    private List<Answer> answers;
 
     public Question() {}
 
@@ -46,7 +44,7 @@ public class Question {
         this.createDate = LocalDateTime.now();
     }
 
-    public String getFormattedDate() {
+    public String getFormattedCreateDate() {
         if(createDate == null) {
             return "";
         }
@@ -58,7 +56,19 @@ public class Question {
         this.contents = contents;
     }
 
-    public User getWriter() {
-        return writer;
+    public boolean isSameWriter(User loginUser) {
+        return this.writer.equals(loginUser);
+    }
+
+    @Override
+    public String toString() {
+        return "Question{" +
+                "id=" + id +
+                ", writer=" + writer +
+                ", title='" + title + '\'' +
+                ", contents='" + contents + '\'' +
+                ", createDate=" + createDate +
+                ", answers=" + answers +
+                '}';
     }
 }

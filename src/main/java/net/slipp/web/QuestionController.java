@@ -48,6 +48,13 @@ public class QuestionController {
         if(!HttpSessionUtils.isLoginedUser(session)) {
             return "/users/loginForm";
         }
+
+        User loginedUser = HttpSessionUtils.getUserFromSession(session);
+        Question question = questionRepository.findById(id).orElse(null);
+        if(!question.isSameWriter(loginedUser)) {
+            return "/users/loginForm";
+        }
+
         model.addAttribute("question", questionRepository.findById(id).orElse(null));
         return "/qna/updateForm";
     }
@@ -56,10 +63,6 @@ public class QuestionController {
     public String updateArticle(@PathVariable Long id, String title, String contents, HttpSession session) {
         Question question = questionRepository.findById(id).orElse(null);
 
-        User sessionedUser = HttpSessionUtils.getUserFromSession(session);
-        if(!sessionedUser.getUserId().equals(question.getWriter().getUserId())) {
-            throw new IllegalStateException("로그인 유저만 삭제 가능");
-        }
         question.update(title, contents);
         System.out.println(question.toString());
         questionRepository.save(question);
@@ -68,9 +71,19 @@ public class QuestionController {
     }
 
     @PostMapping("/{id}/deleteArticle")
-    public String deleteArticle(@PathVariable Long id) {
-        questionRepository.deleteById(id);
+    public String deleteArticle(@PathVariable Long id, HttpSession session) {
 
+        if(!HttpSessionUtils.isLoginedUser(session)) {
+            return "/users/loginForm";
+        }
+
+        User loginedUser = HttpSessionUtils.getUserFromSession(session);
+        Question question = questionRepository.findById(id).orElse(null);
+        if(!question.isSameWriter(loginedUser)) {
+            return "/users/loginForm";
+        }
+
+        questionRepository.deleteById(id);
         return "redirect:/";
     }
 
